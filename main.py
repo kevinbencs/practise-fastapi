@@ -16,6 +16,7 @@ def register(email: str, password: str, status_code: 201):
 
 @app.post("/login")
 def login(email: str, password: str, response: Response, status_code: 200):
+
     response.set_cookie(key="authsession", value="token", secure=True, httponly=True)
     return {"message": "success"}
 
