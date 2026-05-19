@@ -1,23 +1,54 @@
-from fastapi import FastAPI, Response, Depends
+from fastapi import FastAPI, Response, Depends, HTTPException
 import jwt
 from pwdlib import PasswordHash
 from jwt.exceptions import InvalidTokenError
 from typing import Annotated
 from fastapi.security import HTTPBasic, HTTPBasicCredentails
+import secrets
+
 
 
 app = FastAPI()
 
 security = HTTPBasic()
 
+def get_current_username(
+        credentials: Annotated[HTTPBasicCredentails, Depends(security)],
+):
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = b"stanleyjobson"
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = b"swordfish"
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes,  correct_password_bytes
+    )
+    if not (is_correct_password and is_correct_username):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"www-Authenticate": "Basic"}
+        )
+    return credentials.username
+
+
+
 @app.get("/")
 def reat_root(status_code: 200):
     return {"message": "Main route"}
 
 
+#@app.get("/user/me")
+#def get_user(credentails: Annotated[HTTPBasicCredentails, Depends(security)]):
+#    return {"username": credentails.username, "pssword": credentails.password}
+
+
 @app.get("/user/me")
-def get_user(credentails: Annotated[HTTPBasicCredentails, Depends(security)]):
-    return {"username": credentails.username, "pssword": credentails.password}
+def get_user(usernme: Annotated[str, Depends(get_current_username)]):
+    return {"username": username}
 
 
 
