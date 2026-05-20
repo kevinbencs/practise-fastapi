@@ -6,6 +6,8 @@ from typing import Annotated
 from fastapi.security import HTTPBasic, HTTPBasicCredentails
 import secrets
 
+SECERT = "supersecret"
+ALGORITHM = "HS256"
 
 
 app = FastAPI()
@@ -47,7 +49,7 @@ def reat_root(status_code: 200):
 
 
 @app.get("/user/me")
-def get_user(usernme: Annotated[str, Depends(get_current_username)]):
+def get_user(username: Annotated[str, Depends(get_current_username)],status_code: 200):
     return {"username": username}
 
 
@@ -56,11 +58,11 @@ def get_user(usernme: Annotated[str, Depends(get_current_username)]):
 #def register(email: str, password: str, status_code: 201):
 #    return {"message": "success"}
 #
-#@app.post("/login")
-#def login(email: str, password: str, response: Response, status_code: 200):
-#
-#    response.set_cookie(key="authsession", value="token", secure=True, httponly=True)
-#    return {"message": "success"}
+@app.post("/login")
+def login(username: Annotated[str, Depends(get_current_username)], response: Response, status_code: 200):
+    token = jwt.encode({"user_name":  username , SECRET, algorithm = ALGORITHM})
+    response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
+    return {"message": "success"}
 #
 #
 #@app.get("/logout")
