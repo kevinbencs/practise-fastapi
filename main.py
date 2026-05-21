@@ -8,10 +8,39 @@ import secrets
 from pydantic import BaseModel
 import bcrypt
 
+from sqlmodel import Field, Session, SQLModel, crete_engine,  select
+
 SECERT = "supersecret"
 ALGORITHM = "HS256"
 
+
+
+class Hero(SQLModel, talble=True):
+    id: int | None=Field(default = None, primary_key = True)
+    name:  str = Field(index =True)
+    email: str= Field(index = True)
+    password: str =Field(index =True)
+
+
+sqlitte_file_name = "database.db"
+sqlite_url = f"sqlite:///{sqlitte_file_name}"
+
+def creatq_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+SessionDep = Annotated[Session, Depends(get_session)]
+
+
+
 app = FastAPI()
+
+
+
+
 
 security = HTTPBasic()
 
