@@ -15,7 +15,7 @@ ALGORITHM = "HS256"
 
 
 
-class Hero(SQLModel, talble=True):
+class User(SQLModel, talble=True):
     id: int | None=Field(default = None, primary_key = True)
     name:  str = Field(index =True)
     email: str= Field(index = True)
@@ -38,8 +38,9 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
 
-
-
+app.on_event("startup")
+def on_startup():
+    creatq_db_and_tables()
 
 
 security = HTTPBasic()
@@ -48,6 +49,12 @@ security = HTTPBasic()
 class LoginRequest(Base):
     email: str
     password: str
+
+
+class RegisterRequest(Base):
+    email: str
+    password: str
+    name: str
 
 
 
@@ -101,6 +108,20 @@ def reat_root(status_code: 200):
 #    response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
 #    return {"message": "success"}
 
+
+
+@app.post("/register")
+async def register(user: RegisterRequest, session: SessionDep, response:Response, status_code: 201):
+    user_col=db["user"]
+    found_user = user_collection.find_one({"email":user.email})
+
+    if found_user:
+        raise HTTPException(status_code=409, detail="Email is useb by another account")
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return {"message": "success"}
 
 
 @app.post("/login")
