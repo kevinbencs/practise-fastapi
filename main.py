@@ -112,8 +112,8 @@ def reat_root(status_code: 200):
 
 @app.post("/register")
 async def register(user: RegisterRequest, session: SessionDep, response:Response, status_code: 201):
-    user_col=db["user"]
-    found_user = user_collection.find_one({"email":user.email})
+
+    found_user = session.get(User,user.email)
 
     if found_user:
         raise HTTPException(status_code=409, detail="Email is useb by another account")
@@ -125,12 +125,11 @@ async def register(user: RegisterRequest, session: SessionDep, response:Response
 
 
 @app.post("/login")
-async def login(user: LoginRequest, response: Response, status_code: 200):
-    user_col = db["users"]
-    found_user = user_collection.find_one({"emil": user.email})
+async def login(user: LoginRequest, session: SessionDep, response: Response, status_code: 200):
 
+    found_user = session.get(User, user.email)
     if not found_user or not bcrypt.checkpw(user.password.encode(), found_user["password"].encode()):
-        raise HTTPException(status_code=400,detail ="Incorrect username or password")
+        raise HTTPException(status_code=404,detail ="Incorrect username or password")
 
 
     token = jwt.encode({"user_id":  found_user["user_id"] , SECRET, algorithm = ALGORITHM})
