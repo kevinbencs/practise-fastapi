@@ -3,29 +3,32 @@ import jwt
 from pwdlib import PasswordHash
 from jwt.exceptions import InvalidTokenError
 from typing import Annotated
-from fastapi.security import HTTPBasic, HTTPBasicCredentails
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import secrets
 from pydantic import BaseModel
 import bcrypt
 
-from sqlmodel import Field, Session, SQLModel, crete_engine,  select
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+from fastapi import status
 
-SECERT = "supersecret"
+SECRET = "supersecret"
 ALGORITHM = "HS256"
 
 
 
-class User(SQLModel, talble=True):
+class User(SQLModel, table=True):
     id: int | None=Field(default = None, primary_key = True)
     name:  str = Field(index =True)
     email: str= Field(index = True)
     password: str =Field(index =True)
 
 
-sqlitte_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlitte_file_name}"
+sqlite_file_name = "database.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-def creatq_db_and_tables():
+engine = create_engine(sqlite_url)
+
+def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
 def get_session():
@@ -38,20 +41,20 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
 
-app.on_event("startup")
+@app.on_event("startup")
 def on_startup():
-    creatq_db_and_tables()
+    create_db_and_tables()
 
 
 security = HTTPBasic()
 
 
-class LoginRequest(Base):
+class LoginRequest(BaseModel):
     email: str
     password: str
 
 
-class RegisterRequest(Base):
+class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str
@@ -82,8 +85,8 @@ class RegisterRequest(Base):
 
 
 
-@app.get("/")
-def reat_root(status_code: 200):
+@app.get("/",status_code=status.HTTP_200_OK)
+def create_root():
     return {"message": "Main route"}
 
 
@@ -110,29 +113,31 @@ def reat_root(status_code: 200):
 
 
 
-@app.post("/register")
-async def register(user: RegisterRequest, session: SessionDep, response:Response, status_code: 201):
+@app.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(user: RegisterRequest, session: SessionDep, response:Response):
 
-    found_user = session.get(User,user.email)
+    found_user = session.exec(select(User).where(User.email == user.email)).first()
 
     if found_user:
         raise HTTPException(status_code=409, detail="Email is useb by another account")
 
-    session.add(user)
+    hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
+    db_user = User(name=user.name, email=user.email, password=hashed_password)
+    session.add(db_user)
     session.commit()
-    session.refresh(user)
+    session.refresh(db_user)
     return {"message": "success"}
 
 
-@app.post("/login")
-async def login(user: LoginRequest, session: SessionDep, response: Response, status_code: 200):
+@app.post("/login", status_code=status.HTTP_200_OK)
+async def login(user: LoginRequest, session: SessionDep, response: Response):
 
-    found_user = session.get(User, user.email)
+    found_user = session.exec(select(User).where(User.email == user.email)).first()
     if not found_user or not bcrypt.checkpw(user.password.encode(), found_user["password"].encode()):
         raise HTTPException(status_code=404,detail ="Incorrect username or password")
 
 
-    token = jwt.encode({"user_id":  found_user["user_id"] , SECRET, algorithm = ALGORITHM})
+    token = jwt.encode({"user_id":  found_user.id }, SECRET, algorithm = ALGORITHM)
     response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
     return {"message": "success"}
 
