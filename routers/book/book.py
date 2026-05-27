@@ -17,12 +17,19 @@ class User(SQLModel, table=True):
     email: str= Field(index = True)
     password: str =Field(index =True)
 
+class Book(SQLModel, table=True):
+    id: int | None=Field(default = None, primary_key = True)
+    name:  str = Field(index =True)
+    user_id: int= Field(index = True)
+
+
 
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url)
+connet_args = {"check_same_thread":False}
+engine = create_engine(sqlite_url, connect_args=connet_args)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
