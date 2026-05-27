@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response, Cookie
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-from typing import Annotated
+from fastapi import APIRouter, Depends, status,  Response, Cookie
+from app.db import SessionDep
 import jwt
+from app.crud.book.book import get_all_books
+
 
 SECRET = "supersecret"
 ALGORITHM = "HS256"
@@ -11,47 +12,7 @@ router = APIRouter(
     tags=['Blog']
 )
 
-class User(SQLModel, table=True):
-    id: int | None=Field(default = None, primary_key = True)
-    name:  str = Field(index =True)
-    email: str= Field(index = True)
-    password: str =Field(index =True)
-
-class Book(SQLModel, table=True):
-    id: int | None=Field(default = None, primary_key = True)
-    name:  str = Field(index =True)
-    user_id: int= Field(index = True)
-
-
-
-
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-
-connet_args = {"check_same_thread":False}
-engine = create_engine(sqlite_url, connect_args=connet_args)
-
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
-SessionDep = Annotated[Session, Depends(get_session)]
-
 
 @router.get("/",status_code=status.HTTP_200_OK)
-async def get_all_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
-    if auth == None :
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detailes = "Please log in")
-
-    id = jwt.decode(auth, SECRET, algorithm = ALGORITHM)
-
-    found_user = session.get(User, id)
-
-    if not found_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail ="Please log in")
-
-    return {"message": "Blogs"}
+def get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
+    return get_all_books(session, auth)

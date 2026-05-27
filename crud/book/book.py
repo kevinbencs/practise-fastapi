@@ -7,12 +7,12 @@ from app.db import get_session
 from fastapi import  Depends, status, HTTPException, Response, Cookie
 from app.model.user.user import User
 from app.model.book.book import Book
+from app.db import SessionDep
 
 SECRET = "supersecret"
 ALGORITHM = "HS256"
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
 
 
 async def get_all_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
