@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import HTTPException, Depends, Response
 import bcrypt
 import jwt
+from app.schema.user.user import LoginRequest, RegisterRequest
+from app.db import get_session
 
 from app.model.user.user import User
 
