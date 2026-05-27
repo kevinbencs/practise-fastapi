@@ -14,7 +14,7 @@ ALGORITHM = "HS256"
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-async def register(user: RegisterRequest, session: SessionDep, response:Response):
+async def Register(user: RegisterRequest, session: SessionDep, response:Response):
 
     found_user = session.exec(select(User).where(User.email == user.email)).first()
 
@@ -30,7 +30,7 @@ async def register(user: RegisterRequest, session: SessionDep, response:Response
 
 
 
-async def login(user: LoginRequest, session: SessionDep, response: Response):
+async def Login(user: LoginRequest, session: SessionDep, response: Response):
 
     found_user = session.exec(select(User).where(User.email == user.email)).first()
     if not found_user or not bcrypt.checkpw(user.password.encode(), found_user["password"].encode()):
@@ -41,6 +41,6 @@ async def login(user: LoginRequest, session: SessionDep, response: Response):
     response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
     return {"message": "success"}
 
-def logout(response: Response):
+def Logout(response: Response):
     response.delete_cookie(key="authsession", secure=True, httponly=True)
     return {"message": "success"}
