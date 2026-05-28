@@ -20,3 +20,9 @@ async def get_all_books(session: SessionDep,  ):
     books = session.exec(select(Book))
 
     return {"Books": books}
+
+
+async def Get_book_id(session: SessionDep, item_id: int):
+    book = session.get(Book, item_id)
+
+    return {"book": book}

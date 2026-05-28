@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, status,  Response, Cookie
 from app.db import SessionDep
 import jwt
-from app.crud.book.book import get_all_books
-from typing import Annotated
-
+from app.crud.book.book import get_all_books, Get_book_id
 
 SECRET = "supersecret"
 ALGORITHM = "HS256"
@@ -17,3 +15,7 @@ router = APIRouter(
 @router.get("/",status_code=status.HTTP_200_OK)
 def get_books(session: SessionDep ):
     return get_all_books(session)
+
+@router.get("/id/{item_id}", status_code=status.HTTP_200_OK)
+def get_book_id(session: SessionDep, item_id: int):
+    return Get_book_id(session, item_id)
