@@ -15,5 +15,5 @@ router = APIRouter(
 
 
 @router.get("/",status_code=status.HTTP_200_OK)
-def get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
-    return get_all_books(session, auth)
+def get_books(session: SessionDep ):
+    return get_all_books(session)

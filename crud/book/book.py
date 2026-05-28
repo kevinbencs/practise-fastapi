@@ -15,7 +15,8 @@ ALGORITHM = "HS256"
 
 
 
-async def get_all_books():
-    
+async def get_all_books(session: SessionDep,  ):
 
-    return {"message": "Blogs"}
+    books = session.exec(select(Book))
+
+    return {"Books": books}
