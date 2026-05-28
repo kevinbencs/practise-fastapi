@@ -1,7 +1,8 @@
-from fastapi import Response,  status, APIRouter
+from fastapi import Response,  status, APIRouter, Cookie
 from app.db import create_db_and_tables
-from app.crud.user.user import Login, Register, Logout, SessionDep
+from app.crud.user.user import Login, Register, Logout, SessionDep, Get_books
 from app.schema.user.user import LoginRequest, RegisterRequest
+from typing import Annotated
 
 router = APIRouter(
     prefix="/user",
@@ -20,3 +21,8 @@ def login(user: LoginRequest, session: SessionDep, response: Response):
 router.get("/logout", status_code=status.HTTP_200_OK)
 def logout(response: Response):
     return Logout(response)
+
+
+router.get("/book", status_code=status.HTTP_200_OK)
+def get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
+    return Get_books(session, auth)

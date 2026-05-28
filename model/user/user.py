@@ -9,4 +9,4 @@ class User(SQLModel, table=True):
     name:  str = Field(index =True)
     email: str= Field(index = True)
     password: str =Field(index =True)
-    Bookes: List[Book] = Relationship(back_populates="user")
+    bookes: List[Book] = Relationship(back_populates="user")

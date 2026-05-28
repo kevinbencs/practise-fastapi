@@ -15,15 +15,7 @@ ALGORITHM = "HS256"
 
 
 
-async def get_all_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
-    if auth == None :
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detailes = "Please log in")
-
-    id = jwt.decode(auth, SECRET, algorithm = ALGORITHM)
-
-    found_user = session.get(User, id)
-
-    if not found_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail ="Please log in")
+async def get_all_books():
+    
 
     return {"message": "Blogs"}
