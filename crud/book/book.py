@@ -26,3 +26,11 @@ async def Get_book_id(session: SessionDep, item_id: int):
     book = session.get(Book, item_id)
 
     return {"book": book}
+
+
+async def Add_book(session: SessionDep, name: str, detail: str):
+    db_book = Book(name, detail)
+    session.add(db_book)
+    session.commit()
+    session.refresh(db_book)
+    return {"message": "success"}
