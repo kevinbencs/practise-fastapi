@@ -34,7 +34,7 @@ async def Register(user: RegisterRequest, session: SessionDep):
 async def Login(user: LoginRequest, session: SessionDep, response: Response):
 
     found_user = session.exec(select(User).where(User.email == user.email)).first()
-    if not found_user or not bcrypt.checkpw(user.password.encode(), found_user["password"].encode()):
+    if not found_user or not bcrypt.checkpw(user.password.encode(), found_user.password.encode()):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail ="Incorrect username or password")
 
 
@@ -42,7 +42,7 @@ async def Login(user: LoginRequest, session: SessionDep, response: Response):
     response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
     return {"message": "success"}
 
-def Logout(response: Response):
+async def Logout(response: Response):
     response.delete_cookie(key="authsession", secure=True, httponly=True)
     return {"message": "success"}
 
@@ -50,11 +50,11 @@ def Logout(response: Response):
 
 async def Get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
     if auth == None :
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detailes = "Please log in")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "Please log in")
 
-    id = jwt.decode(auth, SECRET, algorithm = ALGORITHM)
+    payload = jwt.decode(auth, SECRET, algorithm = ALGORITHM)
 
-    found_user = session.get(User, id)
+    found_user = session.get(User, payload["user_id"])
 
     if not found_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail ="Please log in")

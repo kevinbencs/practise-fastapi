@@ -10,19 +10,19 @@ router = APIRouter(
 )
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(user: RegisterRequest, session: SessionDep):
-    return Register(user, session)
+async def register(user: RegisterRequest, session: SessionDep):
+    return await Register(user, session)
 
 @router.post("/login", status_code=status.HTTP_200_OK)
-def login(user: LoginRequest, session: SessionDep, response: Response):
-    return Login(user, session, response)
+async def login(user: LoginRequest, session: SessionDep, response: Response):
+    return await Login(user, session, response)
 
 
 @router.get("/logout", status_code=status.HTTP_200_OK)
-def logout(response: Response):
-    return Logout(response)
+async def logout(response: Response):
+    return await Logout(response)
 
 
 @router.get("/book", status_code=status.HTTP_200_OK)
-def get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
-    return Get_books(session, auth)
+async def get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]= None ):
+    return await Get_books(session, auth)
