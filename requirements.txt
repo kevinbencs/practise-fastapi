@@ -1,6 +1,5 @@
 fastapi[standard]
 PyJWT
 pwdlib
-typing
 sqlmodel
 bcrypt
