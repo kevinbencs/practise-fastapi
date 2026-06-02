@@ -3,3 +3,4 @@ PyJWT
 pwdlib
 sqlmodel
 bcrypt
+psycopg2-binry
