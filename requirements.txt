@@ -4,3 +4,5 @@ pwdlib
 sqlmodel
 bcrypt
 psycopg2-binry
+beanie
+motor
