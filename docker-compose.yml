@@ -1,0 +1,25 @@
+service:
+    app:
+        build:
+            context: ./app
+        command: "fastapi dev"
+        ports:
+            -"8000:8000"
+        depends_on:
+            - postgres
+        environment:
+            - DATABASE_URL
+
+
+    postgres:
+        image: postgres:15
+        restart: always
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGREs_DB: ${POSTGREs_DB}
+        volumes:
+        - pgdata: /var/lib/postgresql/data
+
+volumes:
+    pgdata:
