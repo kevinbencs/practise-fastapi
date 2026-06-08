@@ -1,8 +1,8 @@
-from sqlmodel import Session, select
+from sqlmodel import select
 from typing import Annotated
 from fastapi import  Depends, status, HTTPException
 from app.model.book.book import Book
-from app.db import SessionDep, get_session
+from app.db import SessionDep
 
 SECRET = "supersecret"
 ALGORITHM = "HS256"

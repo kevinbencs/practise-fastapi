@@ -12,13 +12,13 @@ router = APIRouter(
 
 @router.get("/",status_code=status.HTTP_200_OK)
 async def get_books(session: SessionDep ):
-    return await et_all_books(session)
+    return await get_all_books(session)
 
 @router.get("/id/{item_id}", status_code=status.HTTP_200_OK)
 async def get_book_id(session: SessionDep, item_id: int):
     return await Get_book_id(session, item_id)
 
 
-@router.post("/book/add", status_code=status.HTTP_201_CREATED)
+@router.post("/add", status_code=status.HTTP_201_CREATED)
 async def add_book(session: SessionDep, book: AddBook):
     return await Add_book(session, name=book.name, detail=book.detail)

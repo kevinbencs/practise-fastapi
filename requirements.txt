@@ -3,6 +3,7 @@ PyJWT
 pwdlib
 sqlmodel
 bcrypt
-psycopg2-binry
+psycopg2-binary
 beanie
 motor
+pydantic-settings

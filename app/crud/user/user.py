@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from typing import Annotated
-from fastapi import HTTPException, Depends, Response, status
+from fastapi import HTTPException, Depends, Response, status, Cookie
 import bcrypt
 import jwt
 from app.schema.user.user import LoginRequest, RegisterRequest
@@ -8,9 +8,16 @@ from app.db import get_session
 from app.model.book.book import Book
 
 from app.model.user.user import User
+from app.config import get_settings
 
-SECRET = "supersecret"
-ALGORITHM = "HS256"
+
+settings = get_settings()
+
+SECRET = settings.jwt_secret
+ALGORITHM = settings.jwt_algorithm
+
+
+
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -35,10 +42,10 @@ async def Login(user: LoginRequest, session: SessionDep, response: Response):
 
     found_user = session.exec(select(User).where(User.email == user.email)).first()
     if not found_user or not bcrypt.checkpw(user.password.encode(), found_user.password.encode()):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail ="Incorrect username or password")
+        raise HTTPException(status_code=status.HTTP_401_NOT_FOUND, detail ="Incorrect username or password")
 
 
-    token = jwt.encode({"user_id":  found_user.id }, SECRET, algorithm = ALGORITHM)
+    token = jwt.encode({"user_id":  found_user.id }, SECRET, algorithms = ALGORITHM)
     response.set_cookie(key="authsession", value=token, secure=True, httponly=True)
     return {"message": "success"}
 
@@ -52,7 +59,7 @@ async def Get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]
     if auth == None :
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "Please log in")
 
-    payload = jwt.decode(auth, SECRET, algorithm = ALGORITHM)
+    payload = jwt.decode(auth, SECRET, algorithms = ALGORITHM)
 
     found_user = session.get(User, payload["user_id"])
 
@@ -60,4 +67,4 @@ async def Get_books(session: SessionDep, auth: Annotated[ str | None,  Cookie()]
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail ="Please log in")
 
 
-    return {"books": found_user.bookes}
+    return {"books": found_user.books}

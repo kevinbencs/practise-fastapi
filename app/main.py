@@ -9,22 +9,25 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from .mongo_models import LogEntry
 
+from app.config import get_settings
+
+
+settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
 
-    client = AsyncIOMotorClient("mongodb://...")
-    await init_beanie(database=client.my_fastapi_mongo_db, document_models=[LogEntry])
+    client = AsyncIOMotorClient(settings.mongo_url)
+    await init_beanie(database=client[settings.mongo_db_name], document_models=[LogEntry])
     yield
-    client.close(),
-
+    client.close()
 
 
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/",status_code=status.HTTP_200_OK)
+@app.get("/", status_code=status.HTTP_200_OK)
 async def create_root():
     log = LogEntry(event="Someone visited this route", level="INFo")
     await log.insert()
@@ -33,5 +36,3 @@ async def create_root():
 
 app.include_router(book_router)
 app.include_router(user_router)
-
-
